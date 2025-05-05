@@ -5,34 +5,34 @@ RSpec.describe "User Authentication", type: :system do
     driven_by(:rack_test)
   end
 
-  context "registration" do
-    it "allows users to sign up" do
+  context "When user needs to register" do
+    before do
       user_at_sign_up_page
-      user_can_register
-      user_enters_submit_to_sign_up
+    end
 
-      user_succeeded_to_sign_up
+    it "allows users to sign up" do
+      user_inputs_correct_info_for_register
+      user_signs_up
+
+      user_is_redirected_to_homepage_after_login
     end
 
     it "doesn't allow users to sign up when passwords don't match" do
-      user_at_sign_up_page
-      user_inputs_wrong_password
-      user_enters_submit_to_sign_up
+      user_uses_wrong_password
+      user_signs_up
 
       expect(page).to have_content("Password confirmation doesn't match Password")
     end
 
     it "doesn't allow users to sign up for invalid email format" do
-      user_at_sign_up_page
       user_uses_invalid_email
-      user_enters_submit_to_sign_up
+      user_signs_up
 
       expect(page).to have_content("Email is invalid")
     end
 
     it "doesn't allow users to sign up when required fields are blank" do
-      user_at_sign_up_page
-      user_enters_submit_to_sign_up
+      user_signs_up
 
       expect(page).to have_content("Email can't be blank")
       expect(page).to have_content("Password can't be blank")
@@ -40,55 +40,50 @@ RSpec.describe "User Authentication", type: :system do
     end
 
     it "doesn't allow users to sign up when password is too short" do
-      user_at_sign_up_page
       user_uses_too_short_password
-      user_enters_submit_to_sign_up
+      user_signs_up
 
       expect(page).to have_content("Password is too short")
     end
   end
 
-  context "already have account" do
+  context "When the user already has an account" do
     before do
+      user_visits_login_page
       User.create!(email: 'test@test.test', username: 'testuser', password: 'password')
     end
 
     it "allows user to log in" do
-      user_at_login_page
-      user_can_login
-      user_enters_submit_login_page
+      user_enters_correct_info_for_log_in
+      user_logs_in
 
       expect_successful_login
     end
 
     it "allows user to log out after logging in" do
-      user_at_login_page
-      user_can_login
-      user_enters_submit_login_page
+      user_enters_correct_info_for_log_in
+      user_logs_in
       user_logs_out
 
       expect_successful_logout
     end
 
     it "doesn't allow login with invalid email" do
-      user_at_login_page
       user_enters_wrong_email
-      user_enters_submit_login_page
+      user_logs_in
 
       expect_failed_login
     end
 
     it "doesn't allow login with invalid password" do
-      user_at_login_page
       user_enters_wrong_password
-      user_enters_submit_login_page
+      user_logs_in
 
       expect_failed_login
     end
 
     it "doesn't allow login with blank" do
-      user_at_login_page
-      user_enters_submit_login_page
+      user_logs_in
 
       expect_failed_login
     end
@@ -99,14 +94,14 @@ RSpec.describe "User Authentication", type: :system do
     visit '/users/sign_up'
   end
 
-  def user_can_register
+  def user_inputs_correct_info_for_register
     fill_in 'Email', with: 'test@test.test'
     fill_in 'Username', with: 'testtest'
     fill_in 'Password', with: 'testtest'
     fill_in 'Password confirmation', with: 'testtest'
   end
 
-  def user_inputs_wrong_password
+  def user_uses_wrong_password
     fill_in 'Email', with: 'test@test.test'
     fill_in 'Username', with: 'testtest'
     fill_in 'Password', with: 'testtest'
@@ -127,19 +122,19 @@ RSpec.describe "User Authentication", type: :system do
     fill_in 'Password confirmation', with: 'test'
   end
 
-  def user_enters_submit_to_sign_up
+  def user_signs_up
     click_button 'Sign up'
   end
 
-  def user_succeeded_to_sign_up
+  def user_is_redirected_to_homepage_after_login
     expect(page).to have_content('Welcome')
   end
 
-  def user_at_login_page
+  def user_visits_login_page
     visit '/users/sign_in'
   end
 
-  def user_can_login
+  def user_enters_correct_info_for_log_in
     fill_in 'Email', with: 'test@test.test'
     fill_in 'Password', with: 'password'
   end
@@ -154,7 +149,7 @@ RSpec.describe "User Authentication", type: :system do
     fill_in 'Password', with: 'invalid'
   end
 
-  def user_enters_submit_login_page
+  def user_logs_in
     click_button 'Log in'
   end
 
