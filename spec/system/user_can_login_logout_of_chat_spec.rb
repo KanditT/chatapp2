@@ -10,28 +10,28 @@ RSpec.describe "User Authentication", type: :system do
       user_at_sign_up_page
     end
 
-    it "allows users to sign up" do
+    it "allows user to sign up" do
       user_inputs_correct_info_for_register
       user_signs_up
 
       user_is_redirected_to_homepage_after_login
     end
 
-    it "doesn't allow users to sign up when passwords don't match" do
+    it "doesn't allow user to sign up when passwords don't match" do
       user_uses_wrong_password
       user_signs_up
 
       expect(page).to have_content("Password confirmation doesn't match Password")
     end
 
-    it "doesn't allow users to sign up for invalid email format" do
+    it "doesn't allow user to sign up for invalid email format" do
       user_uses_invalid_email
       user_signs_up
 
       expect(page).to have_content("Email is invalid")
     end
 
-    it "doesn't allow users to sign up when required fields are blank" do
+    it "doesn't allow user to sign up when required fields are blank" do
       user_signs_up
 
       expect(page).to have_content("Email can't be blank")
@@ -39,7 +39,7 @@ RSpec.describe "User Authentication", type: :system do
       expect(page).to have_content("Username can't be blank")
     end
 
-    it "doesn't allow users to sign up when password is too short" do
+    it "doesn't allow user to sign up when password is too short" do
       user_uses_too_short_password
       user_signs_up
 
